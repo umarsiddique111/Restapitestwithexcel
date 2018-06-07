@@ -4,6 +4,7 @@ package com.excelunit.test.Excelunittest;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,10 +13,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.internal.matchers.NotNull;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jxl.Cell;
 import jxl.Sheet;
@@ -41,11 +46,11 @@ public class ExcelunittestApplicationTests {
 		// TO get the access to the sheet
 		Sheet sheet = wb.getSheet("Sheet1");
 	
-		 MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
 		 List<UserRequest> userlist = new ArrayList<UserRequest>();
 		
 		 System.out.println("-----------------------"+sheet.getRows());
-		 for (int row = 2; row < sheet.getRows(); row++) {
+		 for (int row = 1; row < sheet.getRows(); row++) {
+			 MultiValueMap<String, Object> bodyMap = new LinkedMultiValueMap<>();
 			 Cell[] cells = sheet.getRow(row);
 			
 					System.out.println(cells[1].getContents());
@@ -67,18 +72,19 @@ public class ExcelunittestApplicationTests {
 							String Action = request.getAction();
 							String content_type = request.getConten_type();
 							String Parameter = request.getParameter();
+							
 							String[] param = Parameter.split(",");
 							
-							System.out.println("i am here at 1");
+							
+							
 							for (int i =0;i<param.length; i++) {					
 								 String param2 = param[i];
 								 
-								 if(param2.isEmpty()) {
-									 continue;
-								 }
-								 System.out.println("i am here at 2");
-								 System.out.println("parameter lenth"+param.length);
-								 System.out.println("this is Split paramter"+ param2);
+								if(param2.trim().isEmpty()) {
+									continue;
+								}
+									 
+								
 								 String[] param12 = param2.split("=");
 								 String key = param12[0];
 								 String value = param12[1];
@@ -86,27 +92,26 @@ public class ExcelunittestApplicationTests {
 									
 							     
 							       
-							
-
-									
-									
 								  bodyMap.add(key,value);
+								
+								 
+								  if (key.equals("file")) {
+									 
+									  bodyMap.add(key, new FileSystemResource(value));
+									  
+								  }
+								  
+									  
 							}
-							     
-						        UploadClient uploadClient = new UploadClient();
+							
+							    
+							 UploadClient uploadClient = new UploadClient();
 								String result = uploadClient.uploadfile(url,bodyMap,Action,content_type);
 								System.out.println("body send "+bodyMap);
 								System.out.println("My final result "+" "+result);
+							
+						       
 		 }
-		 
-
-		 
-		assertEquals("succefully", "succefully");
 		
-	
-		
-		
-		
+		 }
 	}
-			
-		}
